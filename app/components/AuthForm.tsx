@@ -12,45 +12,67 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
 
         try {
             const endpoint = mode === 'login' ? '/login' : '/register';
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+            const response = await fetch(`${apiUrl}${endpoint}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                // Tip: Some backends expect 'username' instead of 'email'
+                body: JSON.stringify({
+                    username: email,
+                    email: email,
+                    password: password
+                }),
             });
 
+            const result = await response.json();
+
             if (response.ok) {
-                alert(`${mode === 'login' ? 'Logged in!' : 'Registered!'} Success.`);
+                console.log("Success:", result);
+                alert(`${mode.toUpperCase()} Success! Check console for token.`);
             } else {
-                alert('Authentication failed. Check your credentials.');
+                console.error("Server Error:", result);
+                alert(`Error: ${result.detail || 'Check console'}`);
             }
         } catch (error) {
-            console.error('Auth error:', error);
+            console.error('Connection Refused:', error);
+            alert('Cannot reach the Render server. Is it awake?');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm p-8 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md">
-            <h2 className="text-2xl font-bold text-center mb-4 uppercase tracking-tighter">
-                {mode === 'login' ? 'Welcome Back' : 'Create Account'}
-            </h2>
-            <input
-                type="email" placeholder="Email" required
-                className="bg-black/50 border border-white/10 rounded-lg p-3 outline-none focus:border-blue-500 transition"
-                onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-                type="password" placeholder="Password" required
-                className="bg-black/50 border border-white/10 rounded-lg p-3 outline-none focus:border-blue-500 transition"
-                onChange={(e) => setPassword(e.target.value)}
-            />
-            <button
-                type="submit" disabled={loading}
-                className="bg-white text-black font-bold p-3 rounded-lg hover:bg-gray-200 transition disabled:opacity-50"
-            >
-                {loading ? 'Processing...' : mode === 'login' ? 'Login' : 'Sign Up'}
-            </button>
-        </form>
+        <div className="w-full max-w-[450px] mx-auto p-1 bg-gradient-to-b from-white/10 to-transparent rounded-[2.5rem]">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full p-10 bg-[#0A0A0A] rounded-[2.4rem] border border-white/5 shadow-2xl">
+                <div className="text-center mb-4">
+                    <h2 className="text-3xl font-black tracking-tighter uppercase italic text-white">
+                        {mode}
+                    </h2>
+                    <p className="text-[10px] text-gray-500 tracking-[0.3em] uppercase mt-2">Interior Marketplace Access</p>
+                </div>
+
+                <input
+                    type="email" placeholder="Email Address" required
+                    className="bg-black border border-white/10 rounded-xl p-4 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-white"
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+                <input
+                    type="password" placeholder="Password" required
+                    className="bg-black border border-white/10 rounded-xl p-4 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-white"
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+
+                <button
+                    type="submit" disabled={loading}
+                    className="bg-white text-black font-black py-4 rounded-xl hover:bg-blue-500 hover:text-white transition-all active:scale-95 disabled:opacity-50 uppercase text-xs tracking-widest"
+                >
+                    {loading ? 'Authenticating...' : `Execute ${mode}`}
+                </button>
+            </form>
+        </div>
     );
 }
