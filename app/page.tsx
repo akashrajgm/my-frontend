@@ -17,81 +17,70 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen pb-20">
+    <main className="min-h-screen bg-black text-white">
       <Navbar />
 
-      {/* Hero Section: Extreme Typography */}
-      <section className="pt-48 pb-32 px-6 max-w-7xl mx-auto text-center">
-        <span className="text-blue-500 font-mono text-xs tracking-[0.5em] uppercase mb-4 block animate-reveal">
-          Premium Artifacts // 2026
-        </span>
-        <h1 className="text-8xl md:text-9xl font-black tracking-tighter mb-8 animate-reveal [line-height:0.8]">
-          CURATED <br /> <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-white/20 italic">VIBES.</span>
+      {/* Hero Section */}
+      <section className="pt-32 pb-16 px-6 text-center border-b border-white/5">
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-4">
+          Interior Marketplace
         </h1>
-        <p className="text-gray-500 max-w-lg mx-auto text-lg font-light leading-relaxed animate-reveal [animation-delay:200ms]">
-          A high-fidelity marketplace for those who treat interior design as an engineering discipline.
+        <p className="text-gray-400 max-w-2xl mx-auto text-lg">
+          Curated premium furniture pieces sourced from top-tier designers.
         </p>
       </section>
 
-      {/* The Bento Gallery */}
-      <section className="px-6 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+      {/* Clean Grid Gallery */}
+      <section className="py-20 px-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {loading ? (
-            <div className="col-span-12 py-20 text-center animate-pulse text-gray-700 tracking-widest uppercase text-xs">
-              Syncing High-Resolution Data...
+            <div className="col-span-full text-center py-20 text-gray-500 uppercase tracking-widest text-sm">
+              Loading Inventory...
             </div>
           ) : (
-            items.map((item, index) => (
-              <div
-                key={item.id}
-                className={`${index % 3 === 0 ? 'md:col-span-8' : 'md:col-span-4'} animate-reveal`}
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <GlowCard glowColor={index % 2 === 0 ? 'blue' : 'purple'}>
-                  <div className="relative group overflow-hidden rounded-xl h-full flex flex-col justify-between">
+            items.map((item) => (
+              <GlowCard key={item.id} glowColor="blue">
+                <div className="h-full flex flex-col">
+                  <div className="relative h-64 w-full overflow-hidden rounded-t-2xl">
                     <img
                       src={item.image_url}
-                      className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-700"
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      alt={item.name}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-
-                    <div className="relative p-6 mt-auto">
-                      <span className="text-[10px] text-blue-400 font-mono mb-2 block tracking-widest">ID: 00{index + 1}</span>
-                      <h3 className="text-3xl font-bold tracking-tighter">{item.name}</h3>
-                      <p className="text-white/40 text-sm mt-2 line-clamp-1 italic">{item.description}</p>
-                      <div className="mt-6 flex justify-between items-end">
-                        <button className="px-4 py-2 bg-white text-black text-xs font-bold rounded-full hover:bg-blue-500 hover:text-white transition-colors uppercase italic">Acquire</button>
-                        <span className="text-2xl font-black tracking-tighter">${item.price}</span>
-                      </div>
+                  </div>
+                  <div className="p-6 bg-[#0A0A0A] rounded-b-2xl flex-grow flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold mb-2">{item.name}</h3>
+                      <p className="text-gray-400 text-sm line-clamp-2 mb-4">{item.description}</p>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-2xl font-mono text-blue-400">${item.price}</span>
+                      <button className="bg-white text-black px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-500 hover:text-white transition">
+                        View Details
+                      </button>
                     </div>
                   </div>
-                </GlowCard>
-              </div>
+                </div>
+              </GlowCard>
             ))
           )}
         </div>
       </section>
 
-      {/* Senior Level Auth Section */}
-      <section className="mt-40 px-6 max-w-4xl mx-auto">
-        <div className="p-12 rounded-[3rem] bg-white/[0.02] border border-white/5 backdrop-blur-3xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full" />
-          <div className="relative z-10 grid md:grid-cols-2 gap-12">
-            <div>
-              <h2 className="text-4xl font-bold tracking-tighter mb-4 italic">The Forge.</h2>
-              <p className="text-gray-500 text-sm leading-relaxed mb-8">
-                Join our exclusive network to unlock custom build-to-order furniture and early access drops.
-              </p>
-              <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs opacity-50">01</div>
-                <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs opacity-50">02</div>
-                <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs opacity-50">03</div>
-              </div>
-            </div>
-            <AuthForm mode="login" />
+      {/* Clean Auth Section */}
+      <section className="py-24 bg-[#050505] border-t border-white/5">
+        <div className="max-w-xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4 italic">Member Access</h2>
+            <p className="text-gray-500 text-sm">Log in to manage your orders and favorites.</p>
           </div>
+          <AuthForm mode="login" />
         </div>
       </section>
+
+      <footer className="py-10 text-center text-gray-700 text-xs border-t border-white/5">
+        © 2026 Interior Marketplace Studio
+      </footer>
     </main>
   );
 }
