@@ -1,32 +1,37 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  --bg: #050505;
+@theme {
+  --color-brass: #D4AF37;
+  --font-geist-sans: var(--font-geist-sans);
+  --font-geist-mono: var(--font-geist-mono);
 }
 
-body {
-  background-color: var(--bg);
-  color: #ffffff;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  scroll-behavior: smooth;
+/* Custom Layer for Global Resets */
+@layer base {
+  body {
+    background-color: #050505;
+    color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
-/* Custom fade-in for images */
-.img-reveal {
-  animation: imgFade 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* Utility Classes */
+@utility tracking-ultra {
+  letter-spacing: 0.5em;
 }
 
-@keyframes imgFade {
-  from {
-    opacity: 0;
-    filter: grayscale(100%) blur(10px);
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
   }
 
-  to {
-    opacity: 1;
-    filter: grayscale(0%) blur(0px);
-  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Luxury Selection */
+::selection {
+  background: rgba(212, 175, 55, 0.3);
+  color: white;
 }

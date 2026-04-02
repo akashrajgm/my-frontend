@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useRef } from 'react';
 
-export const GlowCard = ({ children, glowColor = 'blue' }: any) => {
+export const GlowCard = ({ children }: { children: React.ReactNode }) => {
     const cardRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -16,17 +16,15 @@ export const GlowCard = ({ children, glowColor = 'blue' }: any) => {
         return () => window.removeEventListener('pointermove', move);
     }, []);
 
-    const colors: any = { blue: '220', purple: '280', orange: '30' };
-
     return (
-        <div ref={cardRef} className="w-full h-[500px] relative group rounded-[2.5rem] border border-white/10 bg-[#0A0A0A] overflow-hidden p-[1px] shadow-2xl hover:border-white/20 transition-colors duration-500">
+        <div ref={cardRef} className="relative group rounded-[2rem] border border-white/5 bg-[#050505] overflow-hidden p-[1px] h-full shadow-2xl">
             <div
                 className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
                 style={{
-                    background: `radial-gradient(400px circle at calc(var(--x) * 1px) calc(var(--y) * 1px), hsl(${colors[glowColor]} 80% 60% / 0.12), transparent 80%)`
+                    background: `radial-gradient(400px circle at calc(var(--x) * 1px) calc(var(--y) * 1px), rgba(59, 130, 246, 0.1), transparent 80%)`
                 }}
             />
-            <div className="relative z-10 h-full w-full bg-[#0A0A0A] rounded-[2.4rem] overflow-hidden">
+            <div className="relative z-10 h-full w-full rounded-[1.9rem] overflow-hidden">
                 {children}
             </div>
         </div>

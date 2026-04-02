@@ -1,96 +1,153 @@
 'use client'
 
-import { useEffect, useState } from "react";
-import Navbar from "./components/Navbar";
-import { GlowCard } from "./components/GlowCard";
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingBag, Search, User, Menu } from 'lucide-react';
+import Navbar from "@/components/ui/Navbar";
+import AuthForm from "@/components/ui/AuthForm";
+import { GlowCard } from "@/components/ui/GlowCard";
 
 export default function Home() {
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [showAuth, setShowAuth] = useState(false);
   const [items, setItems] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  const [activeCategory, setActiveCategory] = useState('ALL');
+
+  // Modern Architectural Mock Data
+  const MOCK_DATA = [
+    { id: 1, name: 'Eames Lounge', price: 4500, category: 'SEATING', image_url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80' },
+    { id: 2, name: 'Panton S-Chair', price: 1200, category: 'SEATING', image_url: 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?q=80' },
+    { id: 3, name: 'Noguchi Table', price: 1800, category: 'TABLES', image_url: 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?q=80' },
+    { id: 4, name: 'Wassily Chair', price: 3100, category: 'SEATING', image_url: 'https://images.unsplash.com/photo-1592078615290-033ee584e267?q=80' },
+    { id: 5, name: 'Arco Lamp', price: 2400, category: 'LIGHTING', image_url: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?q=80' },
+    { id: 6, name: 'Platform Bed', price: 5200, category: 'ARCHIVE', image_url: 'https://images.unsplash.com/photo-1505693419148-ad3035ce6163?q=80' },
+  ];
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/items`)
-      .then(res => res.json())
-      .then(data => { setItems(data); setLoading(false); })
-      .catch(() => setLoading(false));
+    setMounted(true);
+    const savedRole = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
+    setUserRole(savedRole);
+
+    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://interior-marketplace-api.onrender.com';
+
+    fetch(`${baseUrl}/items`)
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(data => setItems(Array.isArray(data) ? data : MOCK_DATA))
+      .catch(() => setItems(MOCK_DATA));
   }, []);
 
-  return (
-    <main className="min-h-screen bg-[#050505] text-white">
-      <Navbar />
+  if (!mounted) return null;
 
-      {/* Full-Screen Hero */}
-      <section className="relative h-screen flex items-center px-10 overflow-hidden">
-        <div className="absolute right-0 top-0 w-1/2 h-full opacity-40">
-          <img
-            src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=2000"
-            className="w-full h-full object-cover img-reveal"
-            alt="Architecture"
-          />
+  const categories = ['ALL', 'SEATING', 'TABLES', 'LIGHTING', 'ARCHIVE'];
+  const filteredItems = activeCategory === 'ALL' ? items : items.filter(i => i.category === activeCategory);
+
+  return (
+    <main className="min-h-screen bg-[#050505] text-white selection:bg-[#D4AF37]/30">
+      <Navbar onAuthClick={() => setShowAuth(true)} />
+
+      {/* Hero Section: Editorial 60vh */}
+      <section className="relative h-[60vh] flex items-center px-6 md:px-20 pt-24 border-b border-white/5 overflow-hidden">
+        <div className="absolute right-0 top-0 w-2/3 h-full opacity-30 grayscale pointer-events-none">
+          <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000" className="w-full h-full object-cover" alt="Hero" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/40 to-transparent" />
         </div>
 
-        <div className="relative z-10 max-w-3xl">
-          <p className="text-blue-500 font-mono text-xs tracking-[0.6em] uppercase mb-6 animate-pulse">Established 2026</p>
-          <h1 className="text-8xl md:text-[10rem] font-black tracking-tighter leading-[0.8] mb-8">
-            PURE <br /> <span className="text-gray-700 italic">FORM.</span>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative z-10">
+          <span className="text-[10px] font-bold tracking-[0.8em] text-[#D4AF37] uppercase mb-4 block">New Collection 2026</span>
+          <h1 className="text-6xl md:text-9xl font-black tracking-tighter uppercase leading-[0.8]">
+            STUDIO <br /> <span className="text-neutral-800 italic font-light">ARCHIVE.</span>
           </h1>
-          <p className="text-gray-500 max-w-md text-lg font-light leading-relaxed mb-10">
-            A curated ecosystem for architectural-grade artifacts. We don't sell furniture; we distribute intent.
-          </p>
-          <div className="flex gap-6 items-center">
-            <div className="h-[1px] w-20 bg-white/20" />
-            <span className="text-[10px] uppercase tracking-[0.4em] text-gray-600">Scroll to explore</span>
-          </div>
-        </div>
+        </motion.div>
       </section>
 
-      {/* Grid Gallery */}
-      <section id="gallery" className="py-32 px-10">
-        <div className="flex justify-between items-end mb-20">
-          <h2 className="text-4xl font-bold tracking-tighter uppercase italic">The Collection</h2>
-          <p className="text-gray-600 text-xs uppercase tracking-widest">Showing {items.length || 0} Artifacts</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {loading ? (
-            [1, 2, 3, 4].map(n => <div key={n} className="h-96 bg-white/5 rounded-3xl animate-pulse" />)
-          ) : (
-            items.map((item, index) => (
-              <GlowCard key={item.id} glowColor={index % 2 === 0 ? 'blue' : 'purple'}>
-                <div className="h-full flex flex-col group cursor-crosshair">
-                  <div className="relative flex-grow overflow-hidden">
-                    <img
-                      src={item.image_url}
-                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                      alt={item.name}
-                    />
-                    <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full text-[10px] border border-white/10">
-                      ${item.price}
-                    </div>
-                  </div>
-                  <div className="p-6 bg-[#0A0A0A] border-t border-white/5">
-                    <h3 className="text-lg font-bold tracking-tight uppercase italic">{item.name}</h3>
-                    <p className="text-[10px] text-gray-600 uppercase tracking-widest mt-2">{item.description || 'Limited Edition'}</p>
-                  </div>
-                </div>
-              </GlowCard>
-            ))
-          )}
-        </div>
-      </section>
-
-      {/* Industrial Footer */}
-      <footer className="py-20 px-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-10">
-        <div className="text-left">
-          <p className="text-xs font-bold tracking-tighter mb-2">Interior Marketplace</p>
-          <p className="text-[10px] text-gray-600">System Version 4.02 // Production Build</p>
-        </div>
-        <div className="flex gap-10">
-          {['Instagram', 'Twitter', 'LinkedIn'].map(link => (
-            <span key={link} className="text-[10px] uppercase tracking-widest text-gray-500 hover:text-white cursor-pointer transition">{link}</span>
+      {/* Category Navigation: High-End Active States */}
+      <nav className="sticky top-24 z-[80] bg-[#050505]/90 backdrop-blur-xl border-b border-white/5 py-8 px-6 md:px-20">
+        <div className="max-w-7xl mx-auto flex gap-6 md:gap-12 overflow-x-auto no-scrollbar">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-8 py-2 text-[10px] uppercase tracking-[0.4em] transition-all rounded-full border
+                ${activeCategory === cat
+                  ? 'bg-[#D4AF37] border-[#D4AF37] text-black font-black'
+                  : 'border-white/10 text-neutral-500 hover:text-white hover:border-white/30'}`}
+            >
+              {cat}
+            </button>
           ))}
         </div>
+      </nav>
+
+      {/* Storefront Product Grid */}
+      <section className="max-w-7xl mx-auto px-6 md:px-20 py-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
+          <AnimatePresence mode="popLayout">
+            {filteredItems.map((item, idx) => (
+              <motion.div
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.5, delay: idx * 0.05 }}
+                key={item.id}
+                className="group cursor-pointer"
+              >
+                <GlowCard>
+                  <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 rounded-sm">
+                    {/* Status Badge */}
+                    <div className="absolute top-6 left-6 z-10 bg-white text-black px-3 py-1 text-[8px] font-black uppercase tracking-widest">
+                      Limited Release
+                    </div>
+
+                    <img
+                      src={item.image_url}
+                      className="w-full h-full object-cover grayscale transition-all duration-1000 group-hover:grayscale-0 group-hover:scale-105"
+                      alt={item.name}
+                    />
+
+                    {/* Quick Add (Brass Button) */}
+                    <div className="absolute inset-x-0 bottom-0 p-8 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-gradient-to-t from-black to-transparent">
+                      <button className="w-full bg-[#D4AF37] text-black py-4 text-[10px] font-black uppercase tracking-widest hover:bg-white transition-colors shadow-2xl">
+                        Add to Collection
+                      </button>
+                    </div>
+                  </div>
+                </GlowCard>
+
+                <div className="mt-8 flex justify-between items-start">
+                  <div>
+                    <h3 className="text-xl font-bold tracking-tighter uppercase italic leading-none mb-2">{item.name}</h3>
+                    <p className="text-[10px] text-neutral-600 uppercase tracking-widest">{item.category}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xl font-mono text-neutral-400 italic">${item.price}</span>
+                    <p className="text-[8px] text-[#D4AF37] font-black uppercase mt-1">Authentic</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      </section>
+
+      {/* Auth Portal */}
+      <AnimatePresence>
+        {showAuth && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-3xl p-6"
+          >
+            <div className="relative w-full max-w-md">
+              <button onClick={() => setShowAuth(false)} className="absolute -top-12 right-0 text-[10px] uppercase tracking-widest text-neutral-600 hover:text-white transition-all">Close [ESC]</button>
+              <AuthForm onSuccess={(role) => { setUserRole(role); setShowAuth(false); }} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <footer className="py-32 border-t border-white/5 text-center mt-20 bg-gradient-to-t from-white/[0.02] to-transparent">
+        <p className="text-[9px] text-neutral-800 uppercase tracking-[1.5em] mb-4">Architecture // Design // Commerce</p>
+        <p className="text-[10px] text-neutral-500 uppercase tracking-widest">© 2026 Archive Global Supply</p>
       </footer>
     </main>
   );
