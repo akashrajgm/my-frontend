@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
-import AuthForm from "./components/AuthForm";
 import { GlowCard } from "./components/GlowCard";
 
 export default function Home() {
@@ -17,49 +16,62 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-black text-white selection:bg-blue-500">
+    <main className="min-h-screen bg-[#050505] text-white">
       <Navbar />
 
-      {/* Modern Hero Section */}
-      <section className="pt-48 pb-24 px-6 max-w-5xl mx-auto text-center">
-        <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-6 leading-[0.9]">
-          INTERIOR <br /> <span className="text-gray-600 italic">MARKETPLACE</span>
-        </h1>
-        <p className="text-gray-500 max-w-xl mx-auto text-base md:text-lg font-light">
-          A high-fidelity marketplace for premium architectural artifacts and curated designer furniture.
-        </p>
+      {/* Full-Screen Hero */}
+      <section className="relative h-screen flex items-center px-10 overflow-hidden">
+        <div className="absolute right-0 top-0 w-1/2 h-full opacity-40">
+          <img
+            src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=2000"
+            className="w-full h-full object-cover img-reveal"
+            alt="Architecture"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/40 to-transparent" />
+        </div>
+
+        <div className="relative z-10 max-w-3xl">
+          <p className="text-blue-500 font-mono text-xs tracking-[0.6em] uppercase mb-6 animate-pulse">Established 2026</p>
+          <h1 className="text-8xl md:text-[10rem] font-black tracking-tighter leading-[0.8] mb-8">
+            PURE <br /> <span className="text-gray-700 italic">FORM.</span>
+          </h1>
+          <p className="text-gray-500 max-w-md text-lg font-light leading-relaxed mb-10">
+            A curated ecosystem for architectural-grade artifacts. We don't sell furniture; we distribute intent.
+          </p>
+          <div className="flex gap-6 items-center">
+            <div className="h-[1px] w-20 bg-white/20" />
+            <span className="text-[10px] uppercase tracking-[0.4em] text-gray-600">Scroll to explore</span>
+          </div>
+        </div>
       </section>
 
       {/* Grid Gallery */}
-      <section className="py-20 px-6 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+      <section id="gallery" className="py-32 px-10">
+        <div className="flex justify-between items-end mb-20">
+          <h2 className="text-4xl font-bold tracking-tighter uppercase italic">The Collection</h2>
+          <p className="text-gray-600 text-xs uppercase tracking-widest">Showing {items.length || 0} Artifacts</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {loading ? (
-            <div className="col-span-full text-center py-20">
-              <div className="w-10 h-10 border-2 border-white/10 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest">Loading Live Inventory</p>
-            </div>
+            [1, 2, 3, 4].map(n => <div key={n} className="h-96 bg-white/5 rounded-3xl animate-pulse" />)
           ) : (
-            items.map((item) => (
-              <GlowCard key={item.id} glowColor="blue">
-                <div className="h-full flex flex-col group">
-                  <div className="relative h-72 w-full overflow-hidden">
+            items.map((item, index) => (
+              <GlowCard key={item.id} glowColor={index % 2 === 0 ? 'blue' : 'purple'}>
+                <div className="h-full flex flex-col group cursor-crosshair">
+                  <div className="relative flex-grow overflow-hidden">
                     <img
                       src={item.image_url}
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                       alt={item.name}
                     />
+                    <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full text-[10px] border border-white/10">
+                      ${item.price}
+                    </div>
                   </div>
-                  <div className="p-8 bg-[#0A0A0A] flex-grow flex flex-col justify-between border-t border-white/5">
-                    <div>
-                      <h3 className="text-2xl font-bold tracking-tight mb-2 uppercase italic">{item.name}</h3>
-                      <p className="text-gray-500 text-xs leading-relaxed line-clamp-2">{item.description}</p>
-                    </div>
-                    <div className="flex justify-between items-center mt-8">
-                      <span className="text-2xl font-black tracking-tighter text-blue-500">${item.price}</span>
-                      <button className="bg-white text-black px-5 py-2 rounded-full text-[10px] font-black hover:bg-blue-500 hover:text-white transition-all uppercase">
-                        Details
-                      </button>
-                    </div>
+                  <div className="p-6 bg-[#0A0A0A] border-t border-white/5">
+                    <h3 className="text-lg font-bold tracking-tight uppercase italic">{item.name}</h3>
+                    <p className="text-[10px] text-gray-600 uppercase tracking-widest mt-2">{item.description || 'Limited Edition'}</p>
                   </div>
                 </div>
               </GlowCard>
@@ -68,25 +80,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Secure Member Portal */}
-      <section className="py-32 px-6 bg-[#030303] border-t border-white/5">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-20 items-center">
-          <div>
-            <h2 className="text-5xl font-black tracking-tighter mb-6 italic uppercase">Member <br /> Access.</h2>
-            <p className="text-gray-500 text-sm leading-relaxed max-w-sm">
-              Enter your credentials to synchronize your architectural projects and track active marketplace acquisitions.
-            </p>
-          </div>
-          <div className="relative">
-            {/* Visual anchor for the form */}
-            <div className="absolute -inset-10 bg-blue-500/5 blur-[80px] rounded-full pointer-events-none" />
-            <AuthForm mode="login" />
-          </div>
+      {/* Industrial Footer */}
+      <footer className="py-20 px-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-10">
+        <div className="text-left">
+          <p className="text-xs font-bold tracking-tighter mb-2">Interior Marketplace</p>
+          <p className="text-[10px] text-gray-600">System Version 4.02 // Production Build</p>
         </div>
-      </section>
-
-      <footer className="py-20 text-center border-t border-white/5">
-        <p className="text-[10px] text-gray-700 tracking-[0.8em] uppercase">Interior Marketplace Studio // 2026</p>
+        <div className="flex gap-10">
+          {['Instagram', 'Twitter', 'LinkedIn'].map(link => (
+            <span key={link} className="text-[10px] uppercase tracking-widest text-gray-500 hover:text-white cursor-pointer transition">{link}</span>
+          ))}
+        </div>
       </footer>
     </main>
   );
