@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState } from "react";
+import Navbar from "./components/Navbar";
+import AuthForm from "./components/AuthForm";
 import { GlowCard } from "./components/GlowCard";
 
-// Define what an Item looks like based on your friend's API docs
 interface InteriorItem {
   id: string | number;
   name: string;
@@ -17,9 +18,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // We use the environment variable we just created in terminal
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
     fetch(`${apiUrl}/items`)
       .then((res) => res.json())
       .then((data) => {
@@ -27,42 +26,32 @@ export default function Home() {
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Failed to fetch from Render:", err);
+        console.error("API Error:", err);
         setLoading(false);
       });
   }, []);
 
   return (
     <main className="bg-[#050505] min-h-screen text-white selection:bg-blue-500/30">
-      {/* Sleek Navbar */}
-      <nav className="p-8 flex justify-between items-center border-b border-white/5">
-        <div className="text-xl font-bold tracking-tighter uppercase">
-          E-COMM <span className="text-gray-500 italic font-light">Interior</span>
-        </div>
-        <div className="text-[10px] uppercase tracking-[0.4em] opacity-30 italic">
-          Live API Mode
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero Section */}
-      <section className="pt-24 pb-20 px-6 text-center">
+      <section className="pt-40 pb-20 px-6 text-center">
         <h1 className="text-7xl font-bold tracking-tighter mb-6">
           Modern <span className="text-gray-500 italic font-light">Spaces</span>
         </h1>
         <p className="text-gray-400 max-w-md mx-auto mb-16 text-sm tracking-wide">
-          Connected to: <span className="text-blue-500 font-mono text-xs">interior-marketplace-api.onrender.com</span>
+          Hover over the gallery to experience our responsive lighting interface.
         </p>
 
-        {/* The Component Grid */}
+        {/* Gallery Grid */}
         <div className="flex flex-wrap justify-center gap-10">
           {loading ? (
-            // Loading State while waiting for Render
             <div className="flex flex-col items-center gap-4 mt-10">
               <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
-              <p className="text-gray-500 animate-pulse uppercase tracking-widest text-xs">Syncing Inventory...</p>
+              <p className="text-gray-500 animate-pulse text-xs uppercase tracking-widest">Syncing Inventory...</p>
             </div>
-          ) : items.length > 0 ? (
-            // Real Data from your friend's API
+          ) : (
             items.map((item) => (
               <GlowCard key={item.id} glowColor="blue">
                 <img
@@ -74,17 +63,42 @@ export default function Home() {
                   <h3 className="text-2xl font-bold">{item.name}</h3>
                   <div className="flex justify-between items-center mt-2">
                     <p className="text-gray-500 text-sm italic">{item.description || "Collection 2026"}</p>
-                    <p className="text-blue-400 font-bold font-mono tracking-tighter text-xl">${item.price}</p>
+                    <p className="text-blue-400 font-bold font-mono text-xl">${item.price}</p>
                   </div>
                 </div>
               </GlowCard>
             ))
-          ) : (
-            // Fallback if no items are returned
-            <p className="text-gray-600 italic">No inventory found in database.</p>
           )}
         </div>
       </section>
+
+      {/* Auth Section */}
+      <section id="auth" className="py-32 px-6 flex flex-col items-center border-t border-white/5 bg-gradient-to-b from-transparent to-blue-900/10">
+        <div className="grid md:grid-cols-2 gap-20 w-full max-w-5xl">
+          <div className="flex flex-col justify-center">
+            <h2 className="text-5xl font-bold tracking-tighter mb-6 underline decoration-blue-500/50">
+              Access the <br /><span className="text-gray-500 italic">Member Portal</span>
+            </h2>
+            <p className="text-gray-400">
+              Connect your account to save your favorite pieces and track your interior design orders in real-time.
+            </p>
+          </div>
+          <div className="flex flex-col gap-12">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.3em] mb-4 text-blue-500 font-bold">Secure Login</p>
+              <AuthForm mode="login" />
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.3em] mb-4 text-purple-500 font-bold">New Member</p>
+              <AuthForm mode="register" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer className="py-20 text-center opacity-20 text-[10px] uppercase tracking-[0.5em]">
+        © 2026 E-Comm Interior Design Studio
+      </footer>
     </main>
   );
 }
