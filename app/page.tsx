@@ -1,65 +1,52 @@
-import Image from "next/image";
+import { GlowCard } from "./components/GlowCard";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="bg-[#050505] min-h-screen text-white selection:bg-blue-500/30">
+      {/* Sleek Navbar */}
+      <nav className="p-8 flex justify-between items-center border-b border-white/5">
+        <div className="text-xl font-bold tracking-tighter uppercase">
+          E-COMM <span className="text-gray-500 italic font-light">Interior</span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="text-[10px] uppercase tracking-[0.4em] opacity-30">Collection v1.0</div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="pt-24 pb-20 px-6 text-center">
+        <h1 className="text-7xl font-bold tracking-tighter mb-6">
+          Modern <span className="text-gray-500 italic font-light">Spaces</span>
+        </h1>
+        <p className="text-gray-400 max-w-md mx-auto mb-16 text-sm tracking-wide">
+          Hover over the gallery to experience our responsive lighting interface.
+        </p>
+
+        {/* The Component Grid */}
+        <div className="flex flex-wrap justify-center gap-10">
+          <GlowCard glowColor="blue">
+            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=800" className="rounded-xl h-60 object-cover border border-white/5" alt="Living" />
+            <div className="text-left mt-6">
+              <h3 className="text-2xl font-bold">Living Room</h3>
+              <p className="text-gray-500 text-sm mt-1">Minimalist textures.</p>
+            </div>
+          </GlowCard>
+
+          <GlowCard glowColor="purple">
+            <img src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?q=80&w=800" className="rounded-xl h-60 object-cover border border-white/5" alt="Bedroom" />
+            <div className="text-left mt-6">
+              <h3 className="text-2xl font-bold">Bedroom</h3>
+              <p className="text-gray-500 text-sm mt-1">Soft aesthetic tones.</p>
+            </div>
+          </GlowCard>
+
+          <GlowCard glowColor="orange">
+            <img src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=800" className="rounded-xl h-60 object-cover border border-white/5" alt="Kitchen" />
+            <div className="text-left mt-6">
+              <h3 className="text-2xl font-bold">Kitchen</h3>
+              <p className="text-gray-400 text-sm mt-1">Industrial precision.</p>
+            </div>
+          </GlowCard>
         </div>
-      </main>
-    </div>
+      </section>
+    </main>
   );
 }
