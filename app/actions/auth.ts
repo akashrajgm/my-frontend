@@ -19,6 +19,7 @@ export async function login(prevState: AuthState, formData: FormData): Promise<A
         params.append('username', String(email))
         params.append('password', String(password))
 
+        // MAKE SURE there is NO extra slash at the end of the URL or before /login
         const res = await fetch('https://interior-marketplace-api.onrender.com/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
