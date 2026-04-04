@@ -9,8 +9,9 @@ export default function Home() {
   const [items, setItems] = useState<any[]>([]);
   const [mounted, setMounted] = useState(false);
   const [activeCategory, setActiveCategory] = useState('ALL');
+  // NEW: Search State for CAT-3
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Modern Architectural Mock Data (Fallback)
   const MOCK_DATA = [
     { id: 1, name: 'Eames Lounge', price: 4500, category: 'SEATING', image_url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80' },
     { id: 2, name: 'Panton S-Chair', price: 1200, category: 'SEATING', image_url: 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?q=80' },
@@ -33,16 +34,20 @@ export default function Home() {
   if (!mounted) return null;
 
   const categories = ['ALL', 'SEATING', 'TABLES', 'LIGHTING', 'ARCHIVE'];
-  const filteredItems = activeCategory === 'ALL' ? items : items.filter(i => i.category === activeCategory);
+
+  // UPDATED: Multi-filter Logic (Category + Search)
+  const filteredItems = items.filter(item => {
+    const matchesCategory = activeCategory === 'ALL' || item.category === activeCategory;
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <main className="min-h-screen bg-[#050505] text-white selection:bg-[#D4AF37]/30">
-      {/* CLEAN NAVBAR: No props needed. 
-         Logic is handled inside the Navbar component itself now.
-      */}
-      <Navbar />
+      {/* Passing the search handler to the Navbar */}
+      <Navbar onSearch={(val: string) => setSearchQuery(val)} />
 
-      {/* Hero Section: Editorial 60vh */}
+      {/* Hero Section */}
       <section className="relative h-[60vh] flex items-center px-6 md:px-20 pt-24 border-b border-white/5 overflow-hidden">
         <div className="absolute right-0 top-0 w-2/3 h-full opacity-30 grayscale pointer-events-none">
           <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000" className="w-full h-full object-cover" alt="Hero" />

@@ -1,101 +1,132 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { Edit2, Trash2, Plus, PackageOpen, Loader2 } from 'lucide-react'
+// Import the server action we created
+import { deleteProduct } from '@/app/actions/products'
 
-export default function DashboardPage() {
-  const [userData, setUserData] = useState<any>(null)
-  const [productCount, setProductCount] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
+export default function MyListingsPage() {
+  const [listings, setListings] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  // Fallback Mock Data for local testing
+  const MOCK_LISTINGS = [
+    { id: '1', name: 'Eames Lounge Chair', price: 4500, category: 'Seating', status: 'Active' },
+    { id: '2', name: 'Noguchi Coffee Table', price: 1800, category: 'Tables', status: 'Pending' }
+  ]
 
   useEffect(() => {
-    async function fetchDashboardData() {
+    const fetchListings = async () => {
       try {
-        // 1. Fetch User Profile
-        const userRes = await fetch('https://interior-marketplace-api.onrender.com/users/me', {
-          headers: {
-            // We'll need to handle the token here once we move to a 
-            // dedicated fetch wrapper, but for now, we're just checking the connection.
-            'Content-Type': 'application/json'
-          }
-        })
-        const user = await userRes.json()
-        setUserData(user)
-
-        // 2. Fetch Products (Using the correct /products endpoint!)
-        const prodRes = await fetch('https://interior-marketplace-api.onrender.com/products')
-        const products = await prodRes.json()
-        setProductCount(Array.isArray(products) ? products.length : 0)
-
+        // In production, this hits Tharun's real "My Items" endpoint
+        const res = await fetch('https://interior-marketplace-api.onrender.com/my-items')
+        const data = await res.json()
+        setListings(Array.isArray(data) ? data : MOCK_LISTINGS)
       } catch (error) {
-        console.error("Dashboard Fetch Error:", error)
+        setListings(MOCK_LISTINGS)
       } finally {
-        setIsLoading(false)
+        setLoading(false)
       }
     }
-
-    fetchDashboardData()
+    fetchListings()
   }, [])
 
-  if (isLoading) return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-zinc-500 animate-pulse">Syncing Archive...</p>
-    </div>
-  )
+  // UPDATED: Fully functional handleDelete
+  const handleDelete = async (id: string) => {
+    const confirmed = confirm("ARCHIVE WARNING: Are you sure you want to permanently remove this asset from the marketplace?")
+
+    if (confirmed) {
+      setDeletingId(id) // Start loading state for this specific button
+
+      const result = await deleteProduct(id)
+
+      if (result?.success) {
+        // Optimistic UI update: Remove it from the list immediately
+        setListings(prev => prev.filter(item => item.id !== id))
+      } else {
+        alert(result?.error || "Failed to remove asset. Archive server might be down.")
+      }
+
+      setDeletingId(null) // Clear loading state
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-black text-white p-8 font-sans">
-      <div className="max-w-7xl mx-auto space-y-12">
-
-        {/* HEADER */}
-        <header className="flex justify-between items-end border-b border-zinc-800 pb-6">
-          <div className="space-y-1">
-            <h1 className="text-4xl font-black uppercase tracking-tighter">
-              {userData?.full_name || 'Archive'} Dashboard
-            </h1>
-            <p className="text-[10px] uppercase tracking-[0.4em] text-zinc-500 font-bold">
-              ID: {userData?.email || 'Unauthorized User'} / Session Active
-            </p>
+    <div className="min-h-screen bg-white text-black p-10 font-sans">
+      <div className="max-w-5xl mx-auto">
+        <header className="flex justify-between items-end mb-16">
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">Merchant Dashboard</span>
+            <h1 className="text-5xl font-black uppercase tracking-tighter mt-2 leading-none">Active Archive</h1>
           </div>
-          <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-            Role / {userData?.role || 'Guest'}
-          </div>
+          <Link href="/dashboard/add-product" className="bg-black text-white px-8 py-4 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-zinc-800 transition-all">
+            <Plus className="w-4 h-4" /> Add Asset
+          </Link>
         </header>
 
-        {/* CONTENT GRID */}
-        <main className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="border border-zinc-900 bg-zinc-950/50 p-6 space-y-4 hover:border-zinc-700 transition-colors cursor-pointer">
-            <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Live Inventory</h2>
-            <p className="text-3xl font-light">{productCount}</p>
+        {loading ? (
+          <div className="py-20 text-center animate-pulse text-[10px] font-bold uppercase tracking-[0.5em] text-zinc-300">Syncing Database...</div>
+        ) : listings.length === 0 ? (
+          <div className="py-32 border-2 border-dashed border-zinc-100 flex flex-col items-center justify-center text-center">
+            <PackageOpen className="w-12 h-12 text-zinc-200 mb-4" />
+            <h2 className="text-xl font-bold uppercase tracking-tighter">Archive is Empty</h2>
+            <p className="text-zinc-400 text-xs mt-2 italic">You haven't listed any architectural elements yet.</p>
           </div>
-
-          <div className="border border-zinc-900 bg-zinc-950/50 p-6 space-y-4 hover:border-zinc-700 transition-colors cursor-pointer">
-            <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Active Orders</h2>
-            <p className="text-3xl font-light">0</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b-2 border-black">
+                  <th className="py-6 text-[10px] font-black uppercase tracking-widest text-zinc-400">Asset Details</th>
+                  <th className="py-6 text-[10px] font-black uppercase tracking-widest text-zinc-400">Category</th>
+                  <th className="py-6 text-[10px] font-black uppercase tracking-widest text-zinc-400">Valuation</th>
+                  <th className="py-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {listings.map((item) => (
+                  <tr key={item.id} className="border-b border-zinc-100 group hover:bg-zinc-50 transition-colors">
+                    <td className="py-8">
+                      <div className="flex flex-col">
+                        <span className="text-lg font-black uppercase tracking-tighter leading-none">{item.name}</span>
+                        <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-zinc-400 mt-2 flex items-center gap-2">
+                          <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'Active' ? 'bg-green-500' : 'bg-amber-500'}`}></span>
+                          {item.status}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-8 text-[10px] font-bold uppercase tracking-widest text-zinc-500">{item.category}</td>
+                    <td className="py-8 text-xl font-mono italic text-zinc-400">${item.price.toLocaleString()}</td>
+                    <td className="py-8 text-right">
+                      <div className="flex justify-end gap-6">
+                        <button className="text-zinc-300 hover:text-black transition-colors">
+                          <Edit2 className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          disabled={deletingId === item.id}
+                          className="text-zinc-300 hover:text-red-600 transition-colors disabled:opacity-30"
+                        >
+                          {deletingId === item.id ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+        )}
 
-          <div className="border border-zinc-900 bg-zinc-950/50 p-6 space-y-4 hover:border-zinc-700 transition-colors cursor-pointer">
-            <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Vendor Status</h2>
-            <p className={`text-sm font-black uppercase tracking-widest ${userData?.role === 'vendor' ? 'text-green-500' : 'text-yellow-500'}`}>
-              {userData?.role === 'vendor' ? 'Verified Partner' : 'Pending Setup'}
-            </p>
-          </div>
-        </main>
-
-        {/* RECENT ACTIVITY */}
-        <section className="pt-12">
-          <div className="border border-dashed border-zinc-800 p-20 text-center">
-            {productCount > 0 ? (
-              <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-400 font-bold">
-                Records Synced Successfully
-              </p>
-            ) : (
-              <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-600 font-bold">
-                No Data Records Found in the Archive
-              </p>
-            )}
-          </div>
-        </section>
-
+        <footer className="mt-20 pt-10 border-t border-zinc-100">
+          <p className="text-[8px] text-zinc-300 uppercase tracking-[0.3em]">Merchant Support: support@studioarchive.com</p>
+        </footer>
       </div>
     </div>
   )

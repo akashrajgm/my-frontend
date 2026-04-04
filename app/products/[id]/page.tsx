@@ -1,68 +1,122 @@
-import React from 'react'
-import { getProductById } from '@/app/actions/products'
+'use client'
+
+import React, { useState, useEffect } from 'react'
+import Navbar from '@/components/ui/Navbar'
+import { motion } from 'framer-motion'
+import { ArrowLeft, ShieldCheck, Truck, Globe } from 'lucide-react'
 import Link from 'next/link'
 
-export default async function ProductDetails({ params }: { params: { id: string } }) {
-    // Next.js automatically grabs the ID from the URL (e.g. /products/123)
-    const product = await getProductById(params.id)
+export default function ProductDetails({ params }: { params: { id: string } }) {
+    const [item, setItem] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
 
-    if (!product) {
-        return (
-            <div className="min-h-screen bg-white flex items-center justify-center">
-                <p className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-300">
-                    Record Not Found in Archive
-                </p>
-            </div>
-        )
-    }
+    useEffect(() => {
+        // In a real scenario, we'd fetch from Tharun's API using the ID
+        // For now, we'll simulate the load of a single Archive Asset
+        const timer = setTimeout(() => {
+            setItem({
+                id: params.id,
+                name: "Eames Lounge & Ottoman",
+                price: 4500,
+                category: "SEATING",
+                description: "An icon of modern design, this piece represents the pinnacle of 20th-century craftsmanship. Featuring premium leather upholstery and a molded plywood shell.",
+                image_url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80",
+                specifications: ["Leather: Top-grain", "Wood: Walnut Plywood", "Dimensions: 32\"W x 32\"D x 31\"H"]
+            })
+            setLoading(false)
+        }, 800)
+        return () => clearTimeout(timer)
+    }, [params.id])
+
+    if (loading) return (
+        <div className="min-h-screen bg-[#050505] flex items-center justify-center text-[10px] font-black uppercase tracking-[0.5em] text-zinc-500 animate-pulse">
+            Retrieving Asset Metadata...
+        </div>
+    )
 
     return (
-        <div className="min-h-screen bg-white text-black font-sans p-10">
-            {/* MINIMAL NAV */}
-            <nav className="mb-20 max-w-7xl mx-auto">
-                <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-black transition-colors">
-                    ← Back to Collection
+        <main className="min-h-screen bg-[#050505] text-white selection:bg-[#D4AF37]/30">
+            <Navbar />
+
+            <div className="max-w-7xl mx-auto px-6 lg:px-20 pt-32 pb-20">
+                <Link href="/" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-[#D4AF37] transition-colors mb-12">
+                    <ArrowLeft className="w-4 h-4" /> Return to Collection
                 </Link>
-            </nav>
 
-            <main className="grid grid-cols-1 lg:grid-cols-2 gap-20 max-w-7xl mx-auto">
-                {/* LEFT: IMAGE SECTION */}
-                <div className="aspect-[4/5] bg-zinc-100 flex items-center justify-center relative overflow-hidden group">
-                    {product.image_url ? (
-                        <img src={product.image_url} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                    ) : (
-                        <span className="text-[10px] uppercase font-bold text-zinc-300 tracking-widest italic">Visual Pending</span>
-                    )}
-                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+                    {/* LEFT: IMAGE GALLERY */}
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="relative aspect-[4/5] bg-zinc-900 overflow-hidden rounded-sm group"
+                    >
+                        <img
+                            src={item.image_url}
+                            alt={item.name}
+                            className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-105"
+                        />
+                        <div className="absolute top-8 left-8 bg-white text-black px-4 py-2 text-[10px] font-black uppercase tracking-widest">
+                            Asset ID: {item.id.slice(0, 8)}
+                        </div>
+                    </motion.div>
 
-                {/* RIGHT: INFO SECTION */}
-                <div className="flex flex-col justify-center space-y-12">
-                    <header className="space-y-4">
-                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">
-                            {product.category || 'Classified'}
+                    {/* RIGHT: CONTENT */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="flex flex-col"
+                    >
+                        <span className="text-[#D4AF37] text-[10px] font-bold tracking-[0.6em] uppercase mb-4 block">
+                            {item.category} // ARCHIVE SPEC
                         </span>
-                        <h1 className="text-7xl font-black uppercase tracking-tighter leading-[0.8]">
-                            {product.name}
+
+                        <h1 className="text-5xl lg:text-7xl font-black uppercase tracking-tighter leading-none mb-6">
+                            {item.name}
                         </h1>
-                        <p className="text-3xl font-light tracking-tight italic">
-                            ${product.price}
-                        </p>
-                    </header>
 
-                    <div className="border-t border-zinc-100 pt-8 max-w-md">
-                        <h2 className="text-[10px] font-black uppercase tracking-widest mb-4 text-zinc-300">Specifications</h2>
-                        <p className="text-zinc-500 leading-relaxed text-sm">
-                            {product.description}
+                        <p className="text-zinc-400 text-lg leading-relaxed font-light mb-10 italic">
+                            "{item.description}"
                         </p>
-                    </div>
 
-                    <div className="pt-6">
-                        <button className="w-full bg-black text-white py-6 text-[10px] font-black uppercase tracking-[0.4em] hover:bg-zinc-800 transition-all active:scale-[0.98]">
-                            Inquire for Acquisition
+                        <div className="border-y border-white/5 py-8 mb-10">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 block mb-2">Acquisition Value</span>
+                            <span className="text-4xl font-mono italic text-white">${item.price.toLocaleString()}</span>
+                        </div>
+
+                        {/* SPECS */}
+                        <div className="space-y-4 mb-12">
+                            {item.specifications.map((spec: string, i: number) => (
+                                <div key={i} className="flex justify-between border-b border-white/5 pb-2">
+                                    <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-500">{spec.split(':')[0]}</span>
+                                    <span className="text-[9px] font-bold uppercase text-white">{spec.split(':')[1]}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* ACTION */}
+                        <button className="w-full bg-white text-black py-6 text-[10px] font-black uppercase tracking-[0.4em] hover:bg-[#D4AF37] hover:text-black transition-all mb-8 shadow-2xl">
+                            Request Acquisition
                         </button>
-                    </div>
+
+                        {/* TRUST BADGES */}
+                        <div className="grid grid-cols-3 gap-4 pt-8 border-t border-white/5">
+                            <div className="text-center">
+                                <ShieldCheck className="w-5 h-5 mx-auto mb-2 text-zinc-500" />
+                                <span className="text-[7px] font-black uppercase tracking-widest text-zinc-600">Authentic</span>
+                            </div>
+                            <div className="text-center">
+                                <Truck className="w-5 h-5 mx-auto mb-2 text-zinc-500" />
+                                <span className="text-[7px] font-black uppercase tracking-widest text-zinc-600">Secure Transport</span>
+                            </div>
+                            <div className="text-center">
+                                <Globe className="w-5 h-5 mx-auto mb-2 text-zinc-500" />
+                                <span className="text-[7px] font-black uppercase tracking-widest text-zinc-600">Global Archive</span>
+                            </div>
+                        </div>
+                    </motion.div>
                 </div>
-            </main>
-        </div>
+            </div>
+        </main>
     )
 }

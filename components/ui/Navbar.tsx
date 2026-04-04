@@ -5,13 +5,16 @@ import Link from 'next/link'
 import { Search, ShoppingBag, User, Menu } from 'lucide-react'
 import { logout } from '@/app/actions/logout'
 
+// 1. UPDATE THE INTERFACE HERE
 interface NavbarProps {
     isLoggedIn?: boolean
     userName?: string
-    role?: string // Added role from the other navbar
+    role?: string
+    onSearch?: (value: string) => void // Add this line
 }
 
-export default function Navbar({ isLoggedIn, userName, role }: NavbarProps) {
+// 2. ADD onSearch TO THE DESTRUCTOR
+export default function Navbar({ isLoggedIn, userName, role, onSearch }: NavbarProps) {
     return (
         <nav className="fixed top-0 left-0 right-0 z-[100] border-b border-white/5 bg-black/90 backdrop-blur-md font-sans h-20">
             <div className="max-w-7xl mx-auto px-6 lg:px-10 h-full flex justify-between items-center">
@@ -32,6 +35,8 @@ export default function Navbar({ isLoggedIn, userName, role }: NavbarProps) {
                     <input
                         type="text"
                         placeholder="Search Archive..."
+                        // 3. ADD THE ONCHANGE HANDLER HERE
+                        onChange={(e) => onSearch?.(e.target.value)}
                         className="bg-transparent border-none outline-none text-[10px] uppercase tracking-widest px-3 w-full text-white placeholder:text-zinc-700"
                     />
                 </div>
@@ -43,8 +48,7 @@ export default function Navbar({ isLoggedIn, userName, role }: NavbarProps) {
 
                         {isLoggedIn && (
                             <>
-                                <Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
-                                {/* Added the Vendor check from the old navbar */}
+                                <Link href="/dashboard" className="hover:text-white transition-colors text-white underline underline-offset-4">Dashboard</Link>
                                 {role === 'vendor' && (
                                     <Link href="/dashboard/my-listings" className="text-zinc-500 hover:text-white transition-colors">Inventory</Link>
                                 )}
