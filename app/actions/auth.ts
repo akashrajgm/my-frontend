@@ -3,7 +3,12 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-export async function login(prevState: any, formData: FormData) {
+// 1. Explicitly define the state type for TypeScript
+export type AuthState = {
+    error: string;
+}
+
+export async function login(prevState: AuthState, formData: FormData): Promise<AuthState> {
     const email = formData.get('email')
     const password = formData.get('password')
     let success = false
@@ -18,22 +23,17 @@ export async function login(prevState: any, formData: FormData) {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: params,
+            cache: 'no-store'
         })
 
         const data = await res.json()
 
         if (!res.ok) {
-            // If we get an error, we turn WHATEVER it is into a readable string
-            console.log("Backend Error Raw:", data)
-
-            let errorMessage = "Access Denied"
+            let errorMessage = "Access Denied."
             if (data.detail) {
-                if (typeof data.detail === 'string') {
-                    errorMessage = data.detail
-                } else if (Array.isArray(data.detail)) {
-                    // This pulls the message out of Tharun's error objects
-                    errorMessage = data.detail.map((err: any) => err.msg || "Invalid field").join(", ")
-                }
+                errorMessage = typeof data.detail === 'string'
+                    ? data.detail
+                    : data.detail.map((err: any) => err.msg).join(", ")
             }
             return { error: String(errorMessage) }
         }
@@ -43,16 +43,22 @@ export async function login(prevState: any, formData: FormData) {
             cookieStore.set('session_token', data.access_token, {
                 httpOnly: true,
                 path: '/',
-                secure: true,
+                secure: true, // Required for Vercel (HTTPS)
+                sameSite: 'lax',
                 maxAge: 60 * 60 * 24
             })
             success = true
         }
     } catch (err) {
-        return { error: "Cannot reach the Studio Archive server." }
+        // If the error isn't a redirect, it's a network issue
+        console.error("Auth Exception:", err)
+        return { error: "Studio Archive server is unreachable." }
     }
 
+    // 2. Redirect MUST happen outside the try/catch
     if (success) {
         redirect('/dashboard')
     }
+
+    return { error: "" }
 }
