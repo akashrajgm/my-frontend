@@ -2,27 +2,32 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
-    // 1. Grab the session token from the user's cookies
     const token = request.cookies.get('session_token')?.value
     const { pathname } = request.nextUrl
 
-    // 2. Define which routes need protection
-    const isPrivatePage = pathname.startsWith('/dashboard') || pathname.startsWith('/vendor/setup')
+    // A. YOUR ORIGINAL "BACKSLASH BUG" FIX (KEEPING THIS SAFE)
+    if (pathname.includes('%5C') || pathname.includes('\\')) {
+        return NextResponse.redirect(new URL('/login', request.url))
+    }
 
-    // 3. The "Bouncer" Logic: 
-    // If they try to enter a private room without a ticket (token), kick them to Login.
-    if (isPrivatePage && !token) {
-        const loginUrl = new URL('/login', request.url)
-        return NextResponse.redirect(loginUrl)
+    const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register')
+    const isHomePage = pathname === '/'
+
+    // B. AUTH LOGIC (MERGED)
+    // If no token and not on Home/Auth pages, kick to Login
+    if (!token && !isAuthPage && !isHomePage) {
+        return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    // If logged in and trying to go to Login/Register, send to Dashboard
+    if (token && isAuthPage) {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
     }
 
     return NextResponse.next()
 }
 
-// 4. The Matcher: Only run this code for these specific paths to save performance
+// C. YOUR ORIGINAL MATCHER (KEEPING THIS AS IS)
 export const config = {
-    matcher: [
-        '/dashboard/:path*',
-        '/vendor/setup'
-    ],
+    matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 }
