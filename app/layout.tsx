@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/ui/Navbar";
 import { CartProvider } from "@/context/CartContext";
-import Script from "next/script"; // 1. IMPORT SCRIPT LOADER
+import Script from "next/script";
+import { Toaster } from "sonner"; // 1. IMPORT THE NOTIFICATION ENGINE (OPS-2)
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +33,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#050505] text-white">
-        {/* 2. RAZORPAY EXTERNAL SCRIPT (PAY-3) */}
+        {/* RAZORPAY SCRIPT (PAY-3) */}
         <Script
           id="razorpay-checkout-js"
           src="https://checkout.razorpay.com/v1/checkout.js"
@@ -40,6 +41,24 @@ export default function RootLayout({
         />
 
         <CartProvider>
+          {/* 2. GLOBAL NOTIFICATIONS (OPS-2) */}
+          <Toaster
+            position="top-center"
+            richColors
+            theme="dark"
+            toastOptions={{
+              style: {
+                background: '#0a0a0a',
+                border: '1px solid #1a1a1a',
+                color: '#fff',
+                fontFamily: 'var(--font-geist-sans)',
+                fontSize: '10px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em'
+              }
+            }}
+          />
+
           {/* GLOBAL NAVIGATION */}
           <Navbar />
 
