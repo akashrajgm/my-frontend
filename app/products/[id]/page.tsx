@@ -3,26 +3,27 @@
 import React, { useState, useEffect, use } from 'react'
 import Navbar from '@/components/ui/Navbar'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ShieldCheck, Truck, Globe, Loader2 } from 'lucide-react'
+import { ArrowLeft, ShieldCheck, Truck, Globe, Loader2, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { getProductById } from '@/app/actions/products'
+import { useCart } from '@/context/CartContext' // 1. IMPORT THE CART HOOK
 
 export default function ProductDetails({ params }: { params: Promise<{ id: string }> }) {
-    // Unwrapping the params for Next.js 15 compatibility
     const resolvedParams = use(params);
     const [item, setItem] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+    const [added, setAdded] = useState(false) // 2. STATE FOR UI FEEDBACK
+
+    const { addToCart } = useCart() // 3. DESTRUCTURE THE ACTION
 
     useEffect(() => {
         const fetchItem = async () => {
             try {
-                // MISSION: Call the real backend action
                 const data = await getProductById(resolvedParams.id)
 
                 if (data) {
                     setItem(data)
                 } else {
-                    // Fallback to mock only if API fails completely
                     setItem({
                         id: resolvedParams.id,
                         name: "Eames Lounge & Ottoman",
@@ -42,6 +43,14 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
         fetchItem()
     }, [resolvedParams.id])
 
+    // 4. HANDLE THE ADD ACTION
+    const handleAddToCart = () => {
+        addToCart(item)
+        setAdded(true)
+        // Reset the button text after 2 seconds
+        setTimeout(() => setAdded(false), 2000)
+    }
+
     if (loading) return (
         <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center space-y-4">
             <Loader2 className="w-8 h-8 text-[#D4AF37] animate-spin" />
@@ -55,7 +64,6 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
 
     return (
         <main className="min-h-screen bg-[#050505] text-white selection:bg-[#D4AF37]/30">
-            {/* Added a dummy onSearch so the Navbar doesn't complain */}
             <Navbar onSearch={() => { }} />
 
             <div className="max-w-7xl mx-auto px-6 lg:px-20 pt-32 pb-20">
@@ -104,7 +112,7 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                             <span className="text-4xl font-mono italic text-white">${item.price?.toLocaleString()}</span>
                         </div>
 
-                        {/* SPECS - Safely checking for specifications array */}
+                        {/* SPECS */}
                         {item.specifications && (
                             <div className="space-y-4 mb-12">
                                 {item.specifications.map((spec: string, i: number) => (
@@ -116,9 +124,19 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                             </div>
                         )}
 
-                        {/* ACTION */}
-                        <button className="w-full bg-white text-black py-6 text-[10px] font-black uppercase tracking-[0.4em] hover:bg-[#D4AF37] hover:text-black transition-all mb-8 shadow-2xl">
-                            Request Acquisition
+                        {/* 5. UPDATED ACTION BUTTON */}
+                        <button
+                            onClick={handleAddToCart}
+                            className={`w-full py-6 text-[10px] font-black uppercase tracking-[0.4em] transition-all mb-8 shadow-2xl flex items-center justify-center gap-2
+                                ${added ? 'bg-[#D4AF37] text-black' : 'bg-white text-black hover:bg-zinc-200'}`}
+                        >
+                            {added ? (
+                                <>
+                                    <CheckCircle2 className="w-4 h-4" /> Added to Collection
+                                </>
+                            ) : (
+                                "Request Acquisition"
+                            )}
                         </button>
 
                         {/* TRUST BADGES */}
