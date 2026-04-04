@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/ui/Navbar"; // Importing your v2.0 Navbar
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Interior Marketplace | Architectural Collective",
+  title: "Studio Archive | Architectural Marketplace",
   description: "Curated premium artifacts for modern living.",
 };
 
@@ -29,7 +30,20 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#050505] text-white">
-        {children}
+        {/* GLOBAL NAVIGATION */}
+        <Navbar />
+
+        {/* MAIN CONTENT AREA */}
+        <main className="flex-grow pt-20">
+          {children}
+        </main>
+
+        {/* FOOTER PLACEHOLDER (Optional) */}
+        <footer className="py-10 border-t border-zinc-900 text-center">
+          <p className="text-[9px] font-black uppercase tracking-[0.5em] text-zinc-700">
+            © 2026 Studio Archive / Architectural Collective
+          </p>
+        </footer>
       </body>
     </html>
   );
