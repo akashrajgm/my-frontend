@@ -63,3 +63,46 @@ export async function login(prevState: AuthState, formData: FormData): Promise<A
 
     return { error: "" }
 }
+// Add this to the bottom of app/actions/auth.ts
+
+export async function setupVendor(prevState: any, formData: FormData) {
+    const businessName = formData.get('businessName')
+    const gstNumber = formData.get('gstNumber')
+    const location = formData.get('location')
+
+    try {
+        const cookieStore = await cookies()
+        const token = cookieStore.get('session_token')?.value
+
+        if (!token) {
+            return { error: "You must be logged in to establish a storefront." }
+        }
+
+        // Hit Tharun's Vendor Setup endpoint
+        const res = await fetch('https://interior-marketplace-api.onrender.com/vendors', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                business_name: String(businessName),
+                gst_number: String(gstNumber),
+                location: String(location)
+            }),
+        })
+
+        const data = await res.json()
+
+        if (!res.ok) {
+            return { error: data.detail || "Failed to establish storefront." }
+        }
+
+        // Success! Redirect to the vendor dashboard
+        redirect('/dashboard/my-listings')
+
+    } catch (error: any) {
+        if (error.message === 'NEXT_REDIRECT') throw error
+        return { error: "The archive server is not responding. Please try again later." }
+    }
+}
