@@ -2,19 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Search, User, Menu } from 'lucide-react';
 import Navbar from "@/components/ui/Navbar";
-import AuthForm from "@/components/ui/AuthForm";
 import { GlowCard } from "@/components/ui/GlowCard";
 
 export default function Home() {
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [showAuth, setShowAuth] = useState(false);
   const [items, setItems] = useState<any[]>([]);
   const [mounted, setMounted] = useState(false);
   const [activeCategory, setActiveCategory] = useState('ALL');
 
-  // Modern Architectural Mock Data
+  // Modern Architectural Mock Data (Fallback)
   const MOCK_DATA = [
     { id: 1, name: 'Eames Lounge', price: 4500, category: 'SEATING', image_url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80' },
     { id: 2, name: 'Panton S-Chair', price: 1200, category: 'SEATING', image_url: 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?q=80' },
@@ -26,9 +22,6 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
-    const savedRole = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
-    setUserRole(savedRole);
-
     const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://interior-marketplace-api.onrender.com';
 
     fetch(`${baseUrl}/items`)
@@ -44,7 +37,10 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#050505] text-white selection:bg-[#D4AF37]/30">
-      <Navbar onAuthClick={() => setShowAuth(true)} />
+      {/* CLEAN NAVBAR: No props needed. 
+         Logic is handled inside the Navbar component itself now.
+      */}
+      <Navbar />
 
       {/* Hero Section: Editorial 60vh */}
       <section className="relative h-[60vh] flex items-center px-6 md:px-20 pt-24 border-b border-white/5 overflow-hidden">
@@ -61,8 +57,8 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* Category Navigation: High-End Active States */}
-      <nav className="sticky top-24 z-[80] bg-[#050505]/90 backdrop-blur-xl border-b border-white/5 py-8 px-6 md:px-20">
+      {/* Category Navigation */}
+      <nav className="sticky top-20 z-[80] bg-[#050505]/90 backdrop-blur-xl border-b border-white/5 py-8 px-6 md:px-20">
         <div className="max-w-7xl mx-auto flex gap-6 md:gap-12 overflow-x-auto no-scrollbar">
           {categories.map(cat => (
             <button
@@ -95,7 +91,6 @@ export default function Home() {
               >
                 <GlowCard>
                   <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 rounded-sm">
-                    {/* Status Badge */}
                     <div className="absolute top-6 left-6 z-10 bg-white text-black px-3 py-1 text-[8px] font-black uppercase tracking-widest">
                       Limited Release
                     </div>
@@ -106,7 +101,6 @@ export default function Home() {
                       alt={item.name}
                     />
 
-                    {/* Quick Add (Brass Button) */}
                     <div className="absolute inset-x-0 bottom-0 p-8 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-gradient-to-t from-black to-transparent">
                       <button className="w-full bg-[#D4AF37] text-black py-4 text-[10px] font-black uppercase tracking-widest hover:bg-white transition-colors shadow-2xl">
                         Add to Collection
@@ -130,20 +124,6 @@ export default function Home() {
           </AnimatePresence>
         </div>
       </section>
-
-      {/* Auth Portal */}
-      <AnimatePresence>
-        {showAuth && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-3xl p-6"
-          >
-            <div className="relative w-full max-w-md">
-              <button onClick={() => setShowAuth(false)} className="absolute -top-12 right-0 text-[10px] uppercase tracking-widest text-neutral-600 hover:text-white transition-all">Close [ESC]</button>
-              <AuthForm onSuccess={(role) => { setUserRole(role); setShowAuth(false); }} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <footer className="py-32 border-t border-white/5 text-center mt-20 bg-gradient-to-t from-white/[0.02] to-transparent">
         <p className="text-[9px] text-neutral-800 uppercase tracking-[1.5em] mb-4">Architecture // Design // Commerce</p>
