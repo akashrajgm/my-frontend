@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Studio Archive | Architectural Marketplace",
   description: "Curated premium artifacts for modern living.",
-});
+};
 
 export default function RootLayout({
   children,
