@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/ui/Navbar";
+import PillNav from "@/components/ui/navbar/PillNav"; // 1. UPDATED TO THE NEW PILLNAV
 import { CartProvider } from "@/context/CartContext";
 import Script from "next/script";
-import { Toaster } from "sonner"; // 1. IMPORT THE NOTIFICATION ENGINE (OPS-2)
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,13 +19,17 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Studio Archive | Architectural Marketplace",
   description: "Curated premium artifacts for modern living.",
-};
+});
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // NOTE: You'll eventually get this user data from your Auth logic
+  const isLoggedIn = false;
+  const userName = "";
+
   return (
     <html
       lang="en"
@@ -33,7 +37,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#050505] text-white">
-        {/* RAZORPAY SCRIPT (PAY-3) */}
+        {/* RAZORPAY SCRIPT */}
         <Script
           id="razorpay-checkout-js"
           src="https://checkout.razorpay.com/v1/checkout.js"
@@ -41,7 +45,7 @@ export default function RootLayout({
         />
 
         <CartProvider>
-          {/* 2. GLOBAL NOTIFICATIONS (OPS-2) */}
+          {/* GLOBAL NOTIFICATIONS */}
           <Toaster
             position="top-center"
             richColors
@@ -59,11 +63,11 @@ export default function RootLayout({
             }}
           />
 
-          {/* GLOBAL NAVIGATION */}
-          <Navbar />
+          {/* 2. THE NEW FLOATING NAVIGATION */}
+          <PillNav isLoggedIn={isLoggedIn} userName={userName} />
 
           {/* MAIN CONTENT AREA */}
-          <main className="flex-grow pt-20">
+          <main className="flex-grow">
             {children}
           </main>
 
