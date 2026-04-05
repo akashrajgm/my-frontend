@@ -1,0 +1,18 @@
+.light-rays-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    /* Sit between the image and the text */
+    overflow: hidden;
+    opacity: 0.6;
+    mix-blend-mode: screen;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
