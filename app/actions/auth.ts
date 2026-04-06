@@ -3,15 +3,19 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-// 1. Explicitly define the state type for TypeScript
+// 1. Updated State type to include the token for the Client-side bridge
 export type AuthState = {
     error: string;
+    token?: string;
 }
 
+/**
+ * AUTHORIZE SESSION
+ * Handles the secure login handshake with the FastAPI backend.
+ */
 export async function login(prevState: AuthState, formData: FormData): Promise<AuthState> {
     const email = formData.get('email')
     const password = formData.get('password')
-    let success = false
 
     try {
         // Tharun's FastAPI expects 'username' and 'password' as Form Data
@@ -19,7 +23,6 @@ export async function login(prevState: AuthState, formData: FormData): Promise<A
         params.append('username', String(email))
         params.append('password', String(password))
 
-        // MAKE SURE there is NO extra slash at the end of the URL or before /login
         const res = await fetch('https://interior-marketplace-api.onrender.com/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -39,32 +42,37 @@ export async function login(prevState: AuthState, formData: FormData): Promise<A
             return { error: String(errorMessage) }
         }
 
+        // SUCCESS HANDSHAKE
         if (data.access_token) {
+            // A. Server-Side Security (Cookie)
             const cookieStore = await cookies()
             cookieStore.set('session_token', data.access_token, {
                 httpOnly: true,
                 path: '/',
-                secure: true, // Required for Vercel (HTTPS)
+                secure: true, // Required for Vercel HTTPS
                 sameSite: 'lax',
                 maxAge: 60 * 60 * 24
             })
-            success = true
+
+            /**
+             * B. Client-Side Bridge
+             * We return the token in the state so the Login Page can save it to 
+             * LocalStorage before the redirect happens.
+             */
+            return { error: "", token: data.access_token }
         }
     } catch (err) {
-        // If the error isn't a redirect, it's a network issue
         console.error("Auth Exception:", err)
         return { error: "Studio Archive server is unreachable." }
     }
 
-    // 2. Redirect MUST happen outside the try/catch
-    if (success) {
-        redirect('/dashboard')
-    }
-
-    return { error: "" }
+    return { error: "Authentication failed. Token not received." }
 }
-// Add this to the bottom of app/actions/auth.ts
 
+/**
+ * ESTABLISH VENDOR STOREFRONT
+ * Connects the user profile to the Professional Vendor tier.
+ */
 export async function setupVendor(prevState: any, formData: FormData) {
     const businessName = formData.get('businessName')
     const gstNumber = formData.get('gstNumber')
@@ -78,7 +86,6 @@ export async function setupVendor(prevState: any, formData: FormData) {
             return { error: "You must be logged in to establish a storefront." }
         }
 
-        // Hit Tharun's Vendor Setup endpoint
         const res = await fetch('https://interior-marketplace-api.onrender.com/vendors', {
             method: 'POST',
             headers: {
@@ -102,6 +109,7 @@ export async function setupVendor(prevState: any, formData: FormData) {
         redirect('/dashboard/my-listings')
 
     } catch (error: any) {
+        // If it's a redirect, we must throw it so Next.js handles it
         if (error.message === 'NEXT_REDIRECT') throw error
         return { error: "The archive server is not responding. Please try again later." }
     }
